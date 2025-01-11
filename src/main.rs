@@ -68,43 +68,56 @@ Please select the difficulty level:
         r#"
 Great! You have selected the {} difficulty level.
 You have {} chances to guess the correct number.
+Let's start the game!
 "#,
         difficulty.level, difficulty.chances
     );
 
-    // 1~100のランダムな数値を生成
+    // Generate a random number between 1 and 100
     let secret_number = rand::thread_rng().gen_range(1..=100);
+    let mut attempts = 1;
 
     loop {
-        println!("予想する数字を入力してください:");
+        print!("Enter your guess: ");
+        io::stdout().flush().unwrap();
 
-        // ユーザーの入力を格納するための文字列
+        // String to store user input
         let mut guess = String::new();
 
-        // 標準入力から読み取る
+        // Read from standard input
         io::stdin()
             .read_line(&mut guess)
-            .expect("入力の読み取りに失敗しました");
+            .expect("Failed to read input");
 
-        // 入力を整数に変換（失敗時はループの先頭へ）
+        // Convert input to an integer (loop back to the start on failure)
         let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,
             Err(_) => {
-                println!("有効な数字を入力してください。");
+                println!("Please enter a valid number.");
                 continue;
             }
         };
 
-        println!("あなたの予想: {}", guess);
+        if (guess != secret_number) && ((difficulty.chances - attempts) == 0) {
+            println!(
+                "You have run out of chances. The correct number was {}.",
+                secret_number
+            );
+            break;
+        }
 
-        // 入力と正解を比較
+        // Compare the input with the correct number
         match guess.cmp(&secret_number) {
-            Ordering::Less => println!("もっと大きい数字です！"),
-            Ordering::Greater => println!("もっと小さい数字です！"),
+            Ordering::Less => println!("Incorrect! The number is greater than {}.", guess),
+            Ordering::Greater => println!("Incorrect! The number is less than {}.", guess),
             Ordering::Equal => {
-                println!("正解です！おめでとう！");
+                println!(
+                    "Congratulations! You guessed the correct number in {} attempts.",
+                    attempts
+                );
                 break;
             }
         }
+        attempts += 1;
     }
 }
