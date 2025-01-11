@@ -59,7 +59,7 @@ fn play_game(difficulty: Difficulty) {
     let mut attempts = 1;
 
     loop {
-        print!("Enter your guess: ");
+        print!("Enter your guess ('h' for a hint): ");
         io::stdout().flush().unwrap();
 
         // String to store user input
@@ -69,6 +69,14 @@ fn play_game(difficulty: Difficulty) {
         io::stdin()
             .read_line(&mut guess)
             .expect("Failed to read input");
+
+        if guess.trim().eq("h") {
+            println!(
+                "Hint: The last digit of the secret number is {}.",
+                secret_number % 10
+            );
+            continue;
+        }
 
         // Convert input to an integer (loop back to the start on failure)
         let guess: u32 = match guess.trim().parse() {
