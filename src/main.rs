@@ -1,10 +1,16 @@
 use rand::Rng;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::io::{self, Write};
 
 struct Difficulty {
     level: String,
     chances: u32,
+}
+
+struct HighScore {
+    attempts: u32,
+    duration: std::time::Duration,
 }
 
 fn wait_enter_difficulty() -> Difficulty {
@@ -50,7 +56,7 @@ fn wait_enter_difficulty() -> Difficulty {
     }
 }
 
-fn play_game(difficulty: Difficulty) {
+fn play_game(difficulty: Difficulty, mut high_scores: HashMap<String, HighScore>) {
     // Start the timer
     let start = std::time::Instant::now();
 
@@ -100,6 +106,30 @@ fn play_game(difficulty: Difficulty) {
             Ordering::Less => println!("Incorrect! The number is greater than {}.", guess),
             Ordering::Greater => println!("Incorrect! The number is less than {}.", guess),
             Ordering::Equal => {
+                let mut is_high_score_updated = false;
+                if let Some(high_score) = high_scores.get(&difficulty.level) {
+                    if attempts < high_score.attempts {
+                        is_high_score_updated = true;
+                    } else if attempts == high_score.attempts {
+                        if start.elapsed() < high_score.duration {
+                            is_high_score_updated = true;
+                        }
+                    }
+                } else {
+                    is_high_score_updated = true;
+                }
+
+                if is_high_score_updated {
+                    println!("New high score!");
+                    high_scores.insert(
+                        difficulty.level.clone(),
+                        HighScore {
+                            attempts,
+                            duration: start.elapsed(),
+                        },
+                    );
+                }
+
                 println!(
                     "Congratulations! You guessed the correct number in {} attempts.",
                     attempts
@@ -144,6 +174,8 @@ Please select the difficulty level:
 "#
     );
 
+    let high_scores = HashMap::new();
+
     let difficulty = wait_enter_difficulty();
     println!(
         r#"
@@ -154,7 +186,7 @@ Let's start the game!
         difficulty.level, difficulty.chances
     );
 
-    play_game(difficulty);
+    play_game(difficulty, high_scores);
 }
 
 fn main() {
