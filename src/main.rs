@@ -51,6 +51,9 @@ fn wait_enter_difficulty() -> Difficulty {
 }
 
 fn play_game(difficulty: Difficulty) {
+    // Start the timer
+    let start = std::time::Instant::now();
+
     // Generate a random number between 1 and 100
     let secret_number = rand::thread_rng().gen_range(1..=100);
     let mut attempts = 1;
@@ -98,6 +101,10 @@ fn play_game(difficulty: Difficulty) {
         }
         attempts += 1;
     }
+
+    // Stop the timer
+    let duration = start.elapsed();
+    println!("Time elapsed: {:?}", duration);
 }
 
 fn wait_enter_retry() -> bool {
