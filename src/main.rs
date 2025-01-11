@@ -50,29 +50,7 @@ fn wait_enter_difficulty() -> Difficulty {
     }
 }
 
-fn main() {
-    println!(
-        r#"
-Welcome to the Number Guessing Game!
-I'm thinking of a number between 1 and 100.
-
-Please select the difficulty level:
-1. Easy (10 chances)
-2. Medium (5 chances)
-3. Hard (3 chances)
-"#
-    );
-
-    let difficulty = wait_enter_difficulty();
-    println!(
-        r#"
-Great! You have selected the {} difficulty level.
-You have {} chances to guess the correct number.
-Let's start the game!
-"#,
-        difficulty.level, difficulty.chances
-    );
-
+fn play_game(difficulty: Difficulty) {
     // Generate a random number between 1 and 100
     let secret_number = rand::thread_rng().gen_range(1..=100);
     let mut attempts = 1;
@@ -120,4 +98,64 @@ Let's start the game!
         }
         attempts += 1;
     }
+}
+
+fn wait_enter_retry() -> bool {
+    print!("Do you want to play again? (y/n): ");
+    io::stdout().flush().unwrap();
+
+    let mut retry = String::new();
+    io::stdin()
+        .read_line(&mut retry)
+        .expect("Failed to read input");
+
+    match retry.trim() {
+        "y" => true,
+        "n" => false,
+        _ => {
+            println!("Invalid choice. Please try again.");
+            return wait_enter_retry();
+        }
+    }
+}
+
+fn start_game() {
+    println!(
+        r#"
+Please select the difficulty level:
+1. Easy (10 chances)
+2. Medium (5 chances)
+3. Hard (3 chances)
+"#
+    );
+
+    let difficulty = wait_enter_difficulty();
+    println!(
+        r#"
+Great! You have selected the {} difficulty level.
+You have {} chances to guess the correct number.
+Let's start the game!
+"#,
+        difficulty.level, difficulty.chances
+    );
+
+    play_game(difficulty);
+}
+
+fn main() {
+    println!(
+        r#"
+Welcome to the Number Guessing Game!
+I'm thinking of a number between 1 and 100.
+"#
+    );
+
+    loop {
+        start_game();
+        if wait_enter_retry() {
+            continue;
+        }
+        break;
+    }
+    println!("Thank you for playing the Number Guessing Game!");
 }
